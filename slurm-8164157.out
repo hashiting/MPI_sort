@@ -1,0 +1,7 @@
+staring..
+Tue Jan 14 16:12:37 CET 2020
+serial time for size of 1024 is: 0.000106s
+begin MPI_sort
+sucessfully sort!
+parallel time for size of 1024 using 2 process is: 0.000160s
+Tue Jan 14 16:12:37 CET 2020

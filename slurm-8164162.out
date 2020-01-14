@@ -1,0 +1,7 @@
+staring..
+Tue Jan 14 16:14:13 CET 2020
+serial time for size of 8192 is: 0.001071s
+begin MPI_sort
+sucessfully sort!
+parallel time for size of 8192 using 2 process is: 0.001144s
+Tue Jan 14 16:14:13 CET 2020
