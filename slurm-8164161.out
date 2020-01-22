@@ -1,7 +1,0 @@
-staring..
-Tue Jan 14 16:13:33 CET 2020
-serial time for size of 4096 is: 0.000515s
-begin MPI_sort
-sucessfully sort!
-parallel time for size of 4096 using 8 process is: 0.000795s
-Tue Jan 14 16:13:33 CET 2020

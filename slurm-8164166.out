@@ -1,7 +1,0 @@
-staring..
-Tue Jan 14 16:15:12 CET 2020
-serial time for size of 65535 is: 0.010712s
-begin MPI_sort
-sucessfully sort!
-parallel time for size of 65535 using 2 process is: 0.010899s
-Tue Jan 14 16:15:13 CET 2020

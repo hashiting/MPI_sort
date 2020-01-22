@@ -1,7 +1,0 @@
-staring..
-Tue Jan 14 16:15:40 CET 2020
-serial time for size of 262144 is: 0.046309s
-begin MPI_sort
-sucessfully sort!
-parallel time for size of 262144 using 2 process is: 0.047787s
-Tue Jan 14 16:15:41 CET 2020
