@@ -40,8 +40,8 @@ int Log2(int num)
   	return i;
 }
 
-bool Is_sort(int *array){
-	for(int i = 0;i < SIZE-1;i++){
+bool Is_sort(int *array,int size){
+	for(int i = 0;i < size-1;i++){
 		if(array[i+1] < array[i]){
 			return false;
 		}
@@ -105,7 +105,6 @@ void sort_recursive(int* array, int begin,int end, int currProcRank, int maxRank
 	int pivotIndex = get_privot(array,begin,end);
     int len1 = pivotIndex - begin;
     int len2 = end = pivotIndex;
-
 	if (len1 < len2) {
 		MPI_Send(array, len1, MPI_INT, shareProc, currProcRank, MPI_COMM_WORLD);
 		sort_recursive(array, pivotIndex + 1,end, currProcRank, maxRank, sqrt_num_process);
@@ -133,7 +132,7 @@ int main(int argc, char **argv) {
 		start_time1 = MPI_Wtime();
 		quicksort(temp,0,SIZE-1);
 		end_time1 = MPI_Wtime();
-		if(Is_sort(temp)){
+		if(Is_sort(temp,SIZE)){
             std::cout<<"serial sucessfully sort\n";
         }
 		printf("serial time for size of %d is: %fs\n",SIZE,end_time1-start_time1);
@@ -145,8 +144,11 @@ int main(int argc, char **argv) {
         end_time = MPI_Wtime();
         printf("parallel time using %d process for size of %d is: %fs\n",size,SIZE,end_time-start_time);
 		printf("end MPI_sort\n");
-        if(Is_sort(array)){
+        if(Is_sort(array,SIZE)){
             std::cout<<"parallel sucessfully sort\n";
+        }
+        else{
+            std::cout<<"parallel fail sort\n";
         }
     }
     else {
@@ -163,6 +165,12 @@ int main(int argc, char **argv) {
 
         MPI_Recv(subarray, subarray_size, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         sort_recursive(subarray,0,subarray_size-1, rank, size, sqrt_num_process);
+        if(Is_sort(subarray,subarray_size)){
+            std::cout<<"process "<<rank<<"success sort\n";
+        }
+        else{
+             std::cout<<"process "<<rank<<"fail sort\n";
+        }
         MPI_Send(subarray, subarray_size, MPI_INT, source_process, 0, MPI_COMM_WORLD);
     }
 	MPI_Finalize();
