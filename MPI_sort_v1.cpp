@@ -1,13 +1,15 @@
 #include "mpi.h"
 #include <iostream>
 #include <math.h>
+#include <time.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#define SIZE 16384
-#define range 100000
+#define SIZE 16
+#define range 100
 
-int exp2(int num)
+int Exp2(int num)
 {
   	if(num == 1) return 2;
     else if(num == 0) return 1;
@@ -25,7 +27,7 @@ int exp2(int num)
 
 
 //log2num
-int log2(int num)
+int Log2(int num)
 {
   	int i=1;
   	int j=2;
@@ -83,8 +85,7 @@ void quicksort(int* array,int begin,int end){
 int* generate_random(int num){
 	srand(time(NULL) + rand());
 	int *a = (int*)malloc(num*sizeof(int));
-	int i = 0;
-	for(i = 0;i < num;i++){
+	for(int i = 0;i < num;i++){
 		a[i] = rand()%range;
 	}
 	return a;
@@ -94,7 +95,7 @@ void sort_recursive(int* array, int begin,int end, int currProcRank, int maxRank
 	MPI_Status status;
 	int shareProc = currProcRank + Exp2(sqrt_num_process-1);
 	if (shareProc > maxRank||sqrt_num_process==0) {
-		quicksort(array, begin,end);
+		quicksort(array,begin,end);
 		return;
 	}
 
@@ -106,12 +107,12 @@ void sort_recursive(int* array, int begin,int end, int currProcRank, int maxRank
     int len2 = end = pivotIndex;
 
 	if (len1 < len2) {
-		MPI_Send(array, len1, MPI_INT, shareProc, MPI_ANY_TAG, MPI_COMM_WORLD);
+		MPI_Send(array, len1, MPI_INT, shareProc, currProcRank, MPI_COMM_WORLD);
 		sort_recursive(array, pivotIndex + 1,end, currProcRank, maxRank, sqrt_num_process);
 		MPI_Recv(array, len1, MPI_INT, shareProc, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 	}
 	else {
-		MPI_Send((array + len1 + 1), len2, MPI_INT, shareProc, MPI_ANY_TAG, MPI_COMM_WORLD);
+		MPI_Send((array + len1 + 1), len2, MPI_INT, shareProc, currProcRank, MPI_COMM_WORLD);
 		sort_recursive(array, begin,pivotIndex-1, currProcRank, maxRank, sqrt_num_process);
 		MPI_Recv((array + len1 + 1), len2, MPI_INT, shareProc, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 	}
@@ -132,17 +133,20 @@ int main(int argc, char **argv) {
 		start_time1 = MPI_Wtime();
 		quicksort(temp,0,SIZE-1);
 		end_time1 = MPI_Wtime();
+		if(Is_sort(temp)){
+            std::cout<<"serial sucessfully sort\n";
+        }
 		printf("serial time for size of %d is: %fs\n",SIZE,end_time1-start_time1);
         free(temp);
         array = generate_random(SIZE);
         printf("begin MPI_sort\n");
         start_time = MPI_Wtime();
-        sort_recursive(array,0,SIZE-1,0,size,log2(size));
+        sort_recursive(array,0,SIZE-1,rank,size,log2(size));
         end_time = MPI_Wtime();
-        printf("end MPI_sort\n");
-        printf("parallel time using %d process for size of %d is: %fs\n",size,SIZE,end_time1-start_time1);
+        printf("parallel time using %d process for size of %d is: %fs\n",size,SIZE,end_time-start_time);
+		printf("end MPI_sort\n");
         if(Is_sort(array)){
-            std::cout<<"sucessfully sort\n";
+            std::cout<<"parallel sucessfully sort\n";
         }
     }
     else {
