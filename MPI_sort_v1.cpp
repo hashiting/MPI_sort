@@ -104,7 +104,7 @@ void sort_recursive(int* array, int begin,int end, int currProcRank, int maxRank
 
 	int pivotIndex = get_privot(array,begin,end);
     int len1 = pivotIndex - begin;
-    int len2 = end = pivotIndex;
+    int len2 = end -pivotIndex;
 	if (len1 < len2) {
 		if(len1 != 0)
 		MPI_Send(array, len1, MPI_INT, shareProc, shareProc, MPI_COMM_WORLD);
@@ -169,12 +169,14 @@ int main(int argc, char **argv) {
 
         MPI_Recv(subarray, subarray_size, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         sort_recursive(subarray,0,subarray_size-1, rank, size, sqrt_num_process);
+        /* 
         if(Is_sort(subarray,subarray_size)){
             std::cout<<"process "<<rank<<" "<<subarray_size<<" success sort\n";
         }
         else{
             std::cout<<"process "<<rank<<" fail sort\n";
         }
+        */
         MPI_Send(subarray, subarray_size, MPI_INT, source_process, 0, MPI_COMM_WORLD);
     }
 	MPI_Finalize();
