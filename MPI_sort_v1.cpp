@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SIZE 16
-#define range 100
+#define SIZE 500000
+#define range 500001
 
 int Exp2(int num)
 {
@@ -106,13 +106,17 @@ void sort_recursive(int* array, int begin,int end, int currProcRank, int maxRank
     int len1 = pivotIndex - begin;
     int len2 = end = pivotIndex;
 	if (len1 < len2) {
-		MPI_Send(array, len1, MPI_INT, shareProc, currProcRank, MPI_COMM_WORLD);
+		if(len1 != 0)
+		MPI_Send(array, len1, MPI_INT, shareProc, shareProc, MPI_COMM_WORLD);
 		sort_recursive(array, pivotIndex + 1,end, currProcRank, maxRank, sqrt_num_process);
+		if(len1 != 0)
 		MPI_Recv(array, len1, MPI_INT, shareProc, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 	}
 	else {
-		MPI_Send((array + len1 + 1), len2, MPI_INT, shareProc, currProcRank, MPI_COMM_WORLD);
+		if(len2 != 0)
+		MPI_Send((array + len1 + 1), len2, MPI_INT, shareProc, shareProc, MPI_COMM_WORLD);
 		sort_recursive(array, begin,pivotIndex-1, currProcRank, maxRank, sqrt_num_process);
+		if(len2 != 0)
 		MPI_Recv((array + len1 + 1), len2, MPI_INT, shareProc, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 	}
 }
@@ -133,10 +137,10 @@ int main(int argc, char **argv) {
 		quicksort(temp,0,SIZE-1);
 		end_time1 = MPI_Wtime();
 		if(Is_sort(temp,SIZE)){
-            std::cout<<"serial sucessfully sort\n";
+            //std::cout<<"serial sucessfully sort\n";
         }
 		printf("serial time for size of %d is: %fs\n",SIZE,end_time1-start_time1);
-        free(temp);
+        //free(temp);
         array = generate_random(SIZE);
         printf("begin MPI_sort\n");
         start_time = MPI_Wtime();
@@ -148,7 +152,7 @@ int main(int argc, char **argv) {
             std::cout<<"parallel sucessfully sort\n";
         }
         else{
-            std::cout<<"parallel fail sort\n";
+            //std::cout<<"parallel fail sort\n";
         }
     }
     else {
@@ -166,10 +170,10 @@ int main(int argc, char **argv) {
         MPI_Recv(subarray, subarray_size, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         sort_recursive(subarray,0,subarray_size-1, rank, size, sqrt_num_process);
         if(Is_sort(subarray,subarray_size)){
-            std::cout<<"process "<<rank<<"success sort\n";
+            std::cout<<"process "<<rank<<" "<<subarray_size<<" success sort\n";
         }
         else{
-             std::cout<<"process "<<rank<<"fail sort\n";
+            std::cout<<"process "<<rank<<" fail sort\n";
         }
         MPI_Send(subarray, subarray_size, MPI_INT, source_process, 0, MPI_COMM_WORLD);
     }
