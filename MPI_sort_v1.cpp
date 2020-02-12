@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SIZE 500000
-#define range 500001
+#define SIZE 1000000
+#define range 1000001
 
 int Exp2(int num)
 {
@@ -103,21 +103,23 @@ void sort_recursive(int* array, int begin,int end, int currProcRank, int maxRank
     MPI_Send(&sqrt_num_process, 1, MPI_INT, shareProc, 100, MPI_COMM_WORLD);
 
 	int pivotIndex = get_privot(array,begin,end);
+
     int len1 = pivotIndex - begin;
     int len2 = end -pivotIndex;
+	//std::cout<<currProcRank<<" "<<pivotIndex<<" "<<len1<<" "<<len2<<std::endl;
 	if (len1 < len2) {
 		if(len1 != 0)
-		MPI_Send(array, len1, MPI_INT, shareProc, shareProc, MPI_COMM_WORLD);
+		MPI_Send(array+begin, len1, MPI_INT, shareProc, shareProc, MPI_COMM_WORLD);
 		sort_recursive(array, pivotIndex + 1,end, currProcRank, maxRank, sqrt_num_process);
 		if(len1 != 0)
-		MPI_Recv(array, len1, MPI_INT, shareProc, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		MPI_Recv(array+begin, len1, MPI_INT, shareProc, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 	}
 	else {
 		if(len2 != 0)
-		MPI_Send((array + len1 + 1), len2, MPI_INT, shareProc, shareProc, MPI_COMM_WORLD);
+		MPI_Send((array +begin+ len1 + 1), len2, MPI_INT, shareProc, shareProc, MPI_COMM_WORLD);
 		sort_recursive(array, begin,pivotIndex-1, currProcRank, maxRank, sqrt_num_process);
 		if(len2 != 0)
-		MPI_Recv((array + len1 + 1), len2, MPI_INT, shareProc, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		MPI_Recv((array +begin+ len1 + 1), len2, MPI_INT, shareProc, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 	}
 }
 
@@ -140,7 +142,7 @@ int main(int argc, char **argv) {
             //std::cout<<"serial sucessfully sort\n";
         }
 		printf("serial time for size of %d is: %fs\n",SIZE,end_time1-start_time1);
-        //free(temp);
+        free(temp);
         array = generate_random(SIZE);
         printf("begin MPI_sort\n");
         start_time = MPI_Wtime();
